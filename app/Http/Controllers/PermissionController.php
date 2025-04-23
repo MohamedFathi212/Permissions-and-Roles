@@ -9,8 +9,10 @@ use Spatie\Permission\Models\Permission;
 class PermissionController extends Controller
 {
     public function index(){
-        return view("permissions.list");
-
+        $permissions = Permission::orderBy('created_at' , 'DESC')->paginate(10);
+        return view("permissions.list",[
+            'permissions' => $permissions
+            ]);
     }
 
     public function create(){
@@ -30,15 +32,45 @@ class PermissionController extends Controller
             }
     }
 
-    public function edit(){
-
+    public function edit($id){
+        $permission = Permission::findOrFail($id);
+        return view("permissions.edit",[
+            'permission' => $permission]);
     }
 
-    public function update(){
+    public function update($id ,Request $request ){
+    $permission = Permission::findOrFail($id);
+    $validator = Validator::make($request->all(),[
+        'name' => 'required|min:3|unique:permissions,name,'.$id.',id'
+        ]);
 
+    if($validator->passes()) {
+
+        $permission->name = $request->name;
+        $permission->save();
+
+        return redirect()->route("permissions.index")->with('success' , 'Permission Updated successfully.');
+    }else {
+        return redirect()->route("permissions.edit",$id)->withInput()->withErrors($validator);
     }
+}
 
-    public function destroy(){
+    public function destroy(Request $request){
+        $id = $request->id;
+
+        $permission = Permission::find($id);
+
+        if($permission == null) {
+            session()->flash('error' , "Permission not founded");
+            return response()->json([
+                'status' => false ]);
+        }
+
+        $permission->delete();
+
+        session()->flash('success' , value: "Permission Deleted Successfully.");
+            return response()->json([
+                'status' => true ]);
 
     }
 }
