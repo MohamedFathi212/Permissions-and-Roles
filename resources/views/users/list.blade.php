@@ -2,9 +2,9 @@
     <x-slot name="header">
         <div class="flex justify-between">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('permissions') }}
+            {{ __('Users') }}
         </h2>
-        <a href="{{ route('permissions.create') }}" class="bg-slate-700 text-sm rounded-md text-white px-5 py-2">Create</a>
+        <a href="{{ route('users.create') }}" class="bg-slate-700 text-sm rounded-md text-white px-5 py-2">Create</a>
     </div>
     </x-slot>
 
@@ -17,33 +17,39 @@
                     <tr class="border-b">
                         <th class="px-6 py-3 text-left" width="60">#</th>
                         <th class="px-6 py-3 text-left">Name</th>
+                        <th class="px-6 py-3 text-left">Email</th>
+                        <th class="px-6 py-3 text-left">Roles</th>
                         <th class="px-6 py-3 text-left" width="200">Created</th>
                         <th class="px-6 py-3 text-left" width="200">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white">
-                    @if($permissions->isNotEmpty())
-                    @foreach ($permissions as $permission )
+                    @if($users->isNotEmpty())
+                    @foreach ($users as $user )
                     <tr class="border-b">
                         <td class="px-6 py-3 text-left">
-                            {{ $permission->id }}
+                            {{ $user->id }}
                         </td>
                         <td class="px-6 py-3 text-left">
-                            {{ $permission->name }}
+                            {{ $user->name }}
 
                         </td>
                         <td class="px-6 py-3 text-left">
+                            {{ $user->email }}
+                        </td>
 
-                            {{ \Carbon\Carbon::parse($permission->created_at)->format('d m,y') }}
+                        <td class="px-6 py-3 text-left">
+                            {{ $user->roles->pluck('name')->implode(' ,  ') }}
+                        </td>
 
+                        <td class="px-6 py-3 text-left">
+                            {{ \Carbon\Carbon::parse($user->created_at)->format('d M,Y') }}
                         </td>
                         <td class="px-6 py-3 text-left">
-                            @can('edit permissions')
-                            <a href="{{ route('permissions.edit',$permission->id) }}" class="bg-green-700 text-sm rounded-md text-white px-5 py-2 hover:bg-green-600">Edit</a>
-                            @endcan
-                            @can('delete permissions')
-                            <a href="javascript:void(0);" onclick="deletePermission({{ $permission->id }})" class="bg-red-600 text-sm rounded-md text-white px-5 py-2 hover:bg-red-500">Delete</a>
-                            @endcan
+                        @can('edit users')
+                            <a href="{{ route('users.edit',$user->id) }}" class="bg-green-700 text-sm rounded-md text-white px-5 py-2 hover:bg-green-600">Edit</a>
+                        @endcan
+                            <a href="javascript:void(0);" onclick="deleteUser({{ $user->id }})" class="bg-red-600 text-sm rounded-md text-white px-5 py-2 hover:bg-red-500">Delete</a>
                         </td>
                     </tr>
                     @endforeach
@@ -52,16 +58,16 @@
             </table>
 
             <div class="my-3">
-                {{ $permissions->links() }}
+                {{ $users->links() }}
             </div>
         </div>
     </div>
     <x-slot name="script">
         <script type="text/javascript">
-            function deletePermission(id) {
+            function deleteUser(id) {
                 if (confirm("Are you sure you want to delete this record?")) {
                     $.ajax({
-                        url: `/permissions/${id}`,
+                        url: `/users/${id}`,
                         type: 'DELETE',
                         data: {
                             _token: '{{ csrf_token() }}',
@@ -70,7 +76,7 @@
                             window.location.reload();
                         },
                         error: function(xhr) {
-                            alert('Failed to delete the permission.');
+                            alert('Failed to delete the User.');
                         }
                     });
                 }
